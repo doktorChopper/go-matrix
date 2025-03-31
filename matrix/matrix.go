@@ -153,6 +153,10 @@ func (m *Matrix) Mult(o *Matrix) *Matrix {
     return ret
 }
 
+func (m *Matrix) At(i, j int) float64 {
+    return m.mat[i][j]
+}
+
 
 func (m *Matrix) Display() {
 
