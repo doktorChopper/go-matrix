@@ -1,6 +1,9 @@
 package matrix
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 type Matrix struct {
     rows    int
@@ -64,12 +67,12 @@ func (m *Matrix) Minor(row, col int) *Matrix {
     ret := NewMatrixNM(m.rows - 1, m.cols - 1)
 
     r := 0
-    for i := 0; i < m.rows; i++ {
+    for i := range m.rows {
         if i == row {
             continue
         }
         c := 0
-        for j := 0; j < m.cols; j++ {
+        for j := range m.cols {
             if j == col {
                 continue
             }
@@ -155,6 +158,55 @@ func (m *Matrix) Mult(o *Matrix) *Matrix {
 
 func (m *Matrix) At(i, j int) float64 {
     return m.mat[i][j]
+}
+
+func (m *Matrix) Det() (float64, error) {
+
+    if m.cols != m.rows {
+        return 0.0, nil
+    }
+
+    if m.rows == 1 {
+        return m.mat[0][0], nil
+    }
+
+    if m.rows == 2 {
+        return m.mat[0][0] * m.mat[1][1] - m.mat[0][1] * m.mat[1][0], nil
+    }
+
+    // TODO
+
+    s := 0.0
+    for i := range m.rows {
+        minor := m.Minor(0, i)
+        minorDet, err := minor.Det()
+
+        if err == nil {
+            if i % 2 != 0 {
+                s -= m.mat[0][i] * minorDet
+            } else {
+                s += m.mat[0][i] * minorDet
+            }
+        }
+    }
+
+    return s, nil
+}
+
+func (m *Matrix) AdjugateMatrix() *Matrix {
+
+    ret := NewMatrixNM(m.rows, m.cols)
+
+    for i := range m.rows {
+        for j := range m.cols {
+
+        // TODO check err
+
+            d, _ := m.Minor(i, j).Det()
+            ret.mat[i][j] = math.Pow(-1, float64(i) + float64(j)) * d
+        }
+    }
+    return ret
 }
 
 
