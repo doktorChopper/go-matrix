@@ -156,8 +156,12 @@ func (m *Matrix) Mult(o *Matrix) *Matrix {
     return ret
 }
 
-func (m *Matrix) At(i, j int) float64 {
+func (m *Matrix) GetAt(i, j int) float64 {
     return m.mat[i][j]
+}
+
+func (m *Matrix) SetAt(i, j int, v float64) {
+    m.mat[i][j] = v
 }
 
 func (m *Matrix) Det() (float64, error) {
@@ -193,6 +197,16 @@ func (m *Matrix) Det() (float64, error) {
     return s, nil
 }
 
+func (m *Matrix) InverseMatrix() *Matrix {
+
+    d, _ := m.Det()
+    ret := m.AdjugateMatrix().Transposition()
+    
+    ret.ScalarDiv(d)
+
+    return ret
+} 
+
 func (m *Matrix) AdjugateMatrix() *Matrix {
 
     ret := NewMatrixNM(m.rows, m.cols)
@@ -222,6 +236,5 @@ func (m *Matrix) Display() {
 
     fmt.Println()
 }
-
 
 
