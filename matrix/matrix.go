@@ -67,12 +67,12 @@ func (m *Matrix) Minor(row, col int) *Matrix {
     ret := NewMatrixNM(m.rows - 1, m.cols - 1)
 
     r := 0
-    for i := range m.rows {
+    for i := 0; i < m.rows; i++ {
         if i == row {
             continue
         }
         c := 0
-        for j := range m.cols {
+        for j := 0; j < m.cols; j++ {
             if j == col {
                 continue
             }
@@ -181,7 +181,7 @@ func (m *Matrix) Det() (float64, error) {
     // TODO
 
     s := 0.0
-    for i := range m.rows {
+    for i := 0; i < m.rows; i++ {
         minor := m.Minor(0, i)
         minorDet, err := minor.Det()
 
@@ -211,8 +211,8 @@ func (m *Matrix) AdjugateMatrix() *Matrix {
 
     ret := NewMatrixNM(m.rows, m.cols)
 
-    for i := range m.rows {
-        for j := range m.cols {
+    for i := 0; i < m.rows; i++ {
+        for j := 0; j < m.cols; j++ {
 
         // TODO check err
 
