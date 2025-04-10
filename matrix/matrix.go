@@ -27,13 +27,13 @@ func randFloats(min, max float64) float64 {
 func NewRandomMatrix(n, m int) *Matrix {
 
     min := rand.Float64() * 10
-    max := rand.Float64() * 100
+    max := rand.Float64() * 10
 
     r := NewMatrixNM(n, m)
     
     for i := 0; i < r.rows; i++ {
         for j := 0; j < r.cols; j++ {
-            r.mat[i][j] = randFloats(min, max)
+            r.mat[i][j] = math.Pow(-1, float64(rand.Intn(2))) * randFloats(min, max)
         }
     }
 
