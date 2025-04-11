@@ -276,6 +276,7 @@ func (m *Matrix) Display() {
     }
 
     fmt.Println()
+    fmt.Println()
 }
 
 
