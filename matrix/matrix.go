@@ -1,14 +1,16 @@
 package matrix
 
 import (
+	"errors"
 	"fmt"
 	"math"
+	"reflect"
 )
 
 type Matrix struct {
     rows    int
     cols    int
-    mat     [][]float64
+    mat     [][]interface{}
 }
 
 func NewMatrix() *Matrix {
@@ -21,9 +23,9 @@ func NewMatrix() *Matrix {
 
 func NewMatrixNM(n, m int) *Matrix {
 
-    r := make([][]float64, n)
+    r := make([][]interface{}, n)
     for i := range r {
-        r[i] = make([]float64, m)
+        r[i] = make([]interface{}, m)
     }
 
     return &Matrix {
@@ -33,7 +35,7 @@ func NewMatrixNM(n, m int) *Matrix {
     }
 }
 
-func NewMatrixFromSlice(s [][]float64) *Matrix {
+func NewMatrixFromSlice(s [][]interface{}) *Matrix {
 
     return &Matrix {
         rows:   len(s),
@@ -85,61 +87,91 @@ func (m *Matrix) Minor(row, col int) *Matrix {
     return ret
 }
 
-func (m *Matrix) ScalarMult(v float64) {
+func (m *Matrix) ScalarMult(v float64) error {
+
+    if reflect.TypeOf(m.mat).Name() != "float64" {
+        return errors.New("wrong type") 
+    }
 
     for i := 0; i < m.rows; i++ {
         for j := 0; j < m.cols; j++ {
-            m.mat[i][j] *= v
+            m.mat[i][j] = m.mat[i][j].(float64) * v
         }
     }
+
+    return nil
 }
 
-func (m *Matrix) ScalarDiv(v float64) {
+func (m *Matrix) ScalarDiv(v float64) error {
+
+    if reflect.TypeOf(m.mat).Name() != "float64" {
+        return errors.New("wrong type") 
+    }
 
     for i := 0; i < m.rows; i++ {
         for j := 0; j < m.cols; j++ {
-            m.mat[i][j] /= v
+            m.mat[i][j] = m.mat[i][j].(float64) / v
         }
     }
+
+    return nil
 }
 
-func (m *Matrix) Sub(o *Matrix) *Matrix {
+func (m *Matrix) Sub(o *Matrix) (*Matrix, error) {
     
     if m.cols != o.cols && m.rows != o.rows {
-        return nil
+        return nil, errors.New("error")
+    }
+
+    if reflect.TypeOf(m.mat).Name() != "float64" &&
+        reflect.TypeOf(o.mat).Name() != "float64" &&
+        reflect.TypeOf(m.mat).Name() != reflect.TypeOf(o.mat).Name() {
+        return nil, errors.New("error")
     }
 
     ret := NewMatrixNM(m.rows, m.cols)
 
     for i := 0; i < m.rows; i++ {
         for j := 0; j < m.cols; j++ {
-            ret.mat[i][j] = m.mat[i][j] - o.mat[i][j]
+            ret.mat[i][j] = m.mat[i][j].(float64) - o.mat[i][j].(float64)
         }
     }
 
-    return ret
+    return ret, nil
 }
 
-func (m *Matrix) Add(o *Matrix) *Matrix {
+func (m *Matrix) Add(o *Matrix) (*Matrix, error) {
     if m.cols != o.cols && m.rows != o.rows {
-        return nil
+        return nil, errors.New("error")
+    }
+
+    if reflect.TypeOf(m.mat).Name() != "float64" &&
+        reflect.TypeOf(o.mat).Name() != "float64" &&
+        reflect.TypeOf(m.mat).Name() != reflect.TypeOf(o.mat).Name() {
+        return nil, errors.New("error")
     }
 
     ret := NewMatrixNM(m.rows, m.cols)
 
     for i := 0; i < m.rows; i++ {
         for j := 0; j < m.cols; j++ {
-            ret.mat[i][j] = m.mat[i][j] + m.mat[i][j]
+            ret.mat[i][j] = m.mat[i][j].(float64) + m.mat[i][j].(float64)
         }
     }
 
-    return ret
+    return ret, nil
 }
 
-func (m *Matrix) Mult(o *Matrix) *Matrix {
+func (m *Matrix) Mult(o *Matrix) (*Matrix, error) {
 
     if m.cols != o.rows {
-        return nil
+        return nil, errors.New("error")
+    }
+
+    if reflect.TypeOf(m.mat).Name() != "float64" &&
+        reflect.TypeOf(o.mat).Name() != "float64" &&
+        reflect.TypeOf(m.mat).Name() != reflect.TypeOf(o.mat).Name() {
+        return nil, errors.New("error")
     }
     
     ret := NewMatrixNM(m.rows, o.cols)
@@ -148,16 +180,21 @@ func (m *Matrix) Mult(o *Matrix) *Matrix {
         for j := 0; j < o.cols; j++ {
             s := 0.0
             for k := 0; k < o.rows; k++ {
-                s += m.mat[i][k] * o.mat[k][j]
+                s += m.mat[i][k].(float64) * o.mat[k][j].(float64)
             }
             ret.mat[i][j] = s
         }
     }
-    return ret
+    return ret, nil
 }
 
-func (m *Matrix) GetAt(i, j int) float64 {
-    return m.mat[i][j]
+func (m *Matrix) GetAt(i, j int) (float64, error) {
+
+    if reflect.TypeOf(m.mat).Name() != "float64" {
+        return -1, errors.New("wrong type") 
+    }
+
+    return m.mat[i][j].(float64), nil
 }
 
 func (m *Matrix) SetAt(i, j int, v float64) {
@@ -166,16 +203,20 @@ func (m *Matrix) SetAt(i, j int, v float64) {
 
 func (m *Matrix) Det() (float64, error) {
 
+    if reflect.TypeOf(m.mat).Name() != "float64" {
+        return -1, errors.New("wrong type") 
+    }
+
     if m.cols != m.rows {
         return 0.0, nil
     }
 
     if m.rows == 1 {
-        return m.mat[0][0], nil
+        return m.mat[0][0].(float64), nil
     }
 
     if m.rows == 2 {
-        return m.mat[0][0] * m.mat[1][1] - m.mat[0][1] * m.mat[1][0], nil
+        return m.mat[0][0].(float64) * m.mat[1][1].(float64) - m.mat[0][1].(float64) * m.mat[1][0].(float64), nil
     }
 
     // TODO
@@ -187,9 +228,9 @@ func (m *Matrix) Det() (float64, error) {
 
         if err == nil {
             if i % 2 != 0 {
-                s -= m.mat[0][i] * minorDet
+                s -= m.mat[0][i].(float64) * minorDet
             } else {
-                s += m.mat[0][i] * minorDet
+                s += m.mat[0][i].(float64) * minorDet
             }
         }
     }
@@ -228,8 +269,8 @@ func (m *Matrix) Display() {
 
     for _, r := range m.mat {
 
-        for _, c := range r {
-            fmt.Printf("%.2f  ", c)
+        for j := range r {
+            fmt.Printf("%.2f  ", r[j].(float64))
         }
         fmt.Println()
     }
