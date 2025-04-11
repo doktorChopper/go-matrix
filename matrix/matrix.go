@@ -26,8 +26,8 @@ func randFloats(min, max float64) float64 {
 
 func NewRandomMatrix(n, m int) *Matrix {
 
-    min := rand.Float64() * 10
-    max := rand.Float64() * 10
+    min := rand.Float64() * 5
+    max := rand.Float64() * 5
 
     r := NewMatrixNM(n, m)
     
